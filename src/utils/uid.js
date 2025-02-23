@@ -1,0 +1,3 @@
+const uid = () => {
+  const numericChata
+}
