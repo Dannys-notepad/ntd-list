@@ -1,8 +1,11 @@
 import express from 'express'
 import crypto from 'crypto'
+import dotenv from 'dotenv'
 import mainRoute from './src/routes/main.route.js'
+import apiRoute from './src/routes/api.route.js'
 import {user} from './src/models/model.js'
 
+dotenv.config()
 const User = new user()
 const app = express()
 const PORT = process.env.PORT || 8000
@@ -29,7 +32,7 @@ app.set('view engine', 'ejs')
 app.use(express.json())
 app.use(express.urlencoded({ extended:false }))
 app.use('/', mainRoute)
-app.use('/api/v1/cta', mainRoute)
+app.use('/api/v1/cta', apiRoute)
 
 app.listen(PORT, () => {
   console.log(`server up and running on port ${PORT}`)

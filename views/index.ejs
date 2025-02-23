@@ -114,94 +114,95 @@
     <div class="bad-habit-list" id="habitsList"></div>
 
     <script>
-        const API_URL = 'https://jsonplaceholder.typicode.com/posts';
-        let habits = [];
+        const BASE_URL = 'https://ntd_list.onrender.com/api/v1/cta';
+let habits = [];
 
-        // DOM Elements
-        const form = document.getElementById('habitForm');
-        const habitsList = document.getElementById('habitsList');
+// DOM Elements
+const form = document.getElementById('habitForm');
+const habitsList = document.getElementById('habitsList');
 
-        // Form submit handler
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const newHabit = {
-                title: document.getElementById('habitTitle').value,
-                body: document.getElementById('habitReason').value,
-                userId: 1 // Mock user ID
-            };
+// Form submit handler
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const newHabit = {
+        title: document.getElementById('habitTitle').value,
+        content: document.getElementById('habitReason').value,
+    };
 
-            try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(newHabit)
-                });
-                
-                const data = await response.json();
-                habits.push(data);
-                renderHabits();
-                form.reset();
-            } catch (error) {
-                console.error('Error adding habit:', error);
-            }
+    try {
+        const response = await fetch(`${BASE_URL}/create`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(newHabit)
         });
-
-        // Delete habit handler
-        const deleteHabit = async (id) => {
-            try {
-                await fetch(`${API_URL}/${id}`, {
-                    method: 'DELETE'
-                });
-                habits = habits.filter(habit => habit.id !== id);
-                renderHabits();
-            } catch (error) {
-                console.error('Error deleting habit:', error);
-            }
-        };
-
-        // Render habits
-        const renderHabits = () => {
-          /*if(habits[0].data.content === 'empty'){
-            habitsList.innerHTML = `
-              <div class="bad-habit-item">
-                    <div class="habit-content">
-                        <p class="h1">You've not added any no to do yet</p>
-                    </div>
-              </div>
-            `*/
-          //}else{
-            habitsList.innerHTML = habits.map(habit => `
-                <div class="bad-habit-item">
-                    <div class="habit-content">
-                        <h3>🚫 ${habit.title}</h3>
-                        <p>${habit.body}</p>
-                        <p class="avoid-text">You should avoid this!</p>
-                    </div>
-                    <div class="habit-actions">
-                        <button onclick="deleteHabit(${habit.id})">Remove</button>
-                    </div>
-                </div>
-            `).join('');
-        //}
-        }
         
+        const data = await response.json();
+        habits.push(data);
+        form.reset();
+        renderHabits();
+    } catch (error) {
+        console.error('Error adding habit:', error);
+    }
+});
 
-        // Initial load
-        const fetchHabits = async () => {
-            try {
-                const response = await fetch(`${API_URL}?userId=1`);
-                const data = await response.json();
-                habits = data;
-                renderHabits();
-            } catch (error) {
-                console.error('Error fetching habits:', error);
-            }
-        };
+// Delete habit handler
+const deleteHabit = async (id) => {
+    try {
+        await fetch(`${BASE_URL}/delete?id=${+id}`, { 
+            method: 'DELETE'
+        });
+        habits = habits.filter(habit => habit.id !== id);
+        renderHabits();
+    } catch (error) {
+        console.error('Error deleting habit:', error);
+    }
+};
 
-        fetchHabits();
+// Render habits
+const renderHabits = () => {
+    if (/*!habits.length ||*/ habits === 'empty') { // Safer empty check
+        habitsList.innerHTML = `
+            <div class="bad-habit-item">
+                <div class="habit-content">
+                    <p class="h1">You've not added any Not To Do Yet</p>
+                </div>
+            </div>
+        `;
+    } else {
+        habitsList.innerHTML = habits.map(habit => `
+            <div class="bad-habit-item">
+                <div class="habit-content">
+                
+                    <h3>🚫 ${habit.title}</h3>
+                    <p>${habit.content}</p>
+                    <p class="avoid-text">You should avoid this!</p>
+                </div>
+                <div class="habit-actions">
+                    <button onclick="deleteHabit(${habit.id})">Remove</button>
+                </div>
+            </div>
+        `).join('');
+    }
+};
+
+// Initial load
+const fetchHabits = async () => {
+    try {
+        const response = await fetch(`${BASE_URL}/all`);
+        const data = await response.json();
+        //console.log(data.toString())
+        // Adjust based on actual API response structure
+        habits = data.data || data.content; // If response is nested under 'data'
+        renderHabits();
+    } catch (error) {
+        console.error('Error fetching habits:', error);
+    }
+};
+
+fetchHabits();
     </script>
 </body>
 </html>
